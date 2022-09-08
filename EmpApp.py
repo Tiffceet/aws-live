@@ -38,6 +38,31 @@ def about():
     return render_template('www.intellipaat.com')
 
 
+@app.route("/getemp", methods=['POST'])
+def GetEmp():
+    emp_id = request.form["emp_id"]
+    with db_conn.cursor() as cursor:
+        sql = "SELECT * FROM employee WHERE `emp_id`=%s"
+        cursor.execute(sql, (emp_id))
+        result = cursor.fetchone()
+        if result is None:
+            return render_template("GetEmp.html", output=f"Employee ID {emp_id} not found.<br>")
+        else:
+            return render_template("GetEmp.html", output=f"""
+            Employee ID:<br> { result[0] } <br><br>
+
+			  		First Name:<br> { result[1] } <br><br>
+
+			  		Last Name:<br> { result[2] } <br><br>
+
+			  		Primary Interest:<br> { result[3] } <br><br>
+
+			  		Location:<br> { result[4] } <br><br>
+
+			  		Image URL: <br> http://www.google.com <br><br>
+            """)
+
+
 @app.route("/addemp", methods=['POST'])
 def AddEmp():
     emp_id = request.form['emp_id']
