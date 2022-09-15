@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+    <div class="p-3">
+        <a href="/view"><button type="button" class="btn btn-outline-secondary"><i
+                    class="fa-solid fa-left-long"></i>&nbsp;Back</button></a>
+        <br />
+        <br />
+        <h1>Edit employee</h1>
+        <form>
+            <div class="mb-3">
+                <label class="form-label">Employee ID</label>
+                <input type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Primary skill</label>
+                <input type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-pencil"></i>&nbsp;Edit</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

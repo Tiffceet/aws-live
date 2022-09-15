@@ -41,3 +41,6 @@ python3 -m pip install autopep8
 mysql -u admin -P 3306 --host hrmsdb.ccdclt0oc5rh.us-east-1.rds.amazonaws.com -p
 ```
 2. Run sql from `database.sql`
+
+## Notes
+1. When creating security group, create it from the VPC page and link it to the correct VPC

@@ -28,14 +28,24 @@ output = {}
 table = 'employee'
 
 
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/", methods=['GET'])
 def home():
-    return render_template('AddEmp.html')
+    return render_template('Home.html')
 
 
-@app.route("/about", methods=['POST'])
-def about():
-    return render_template('www.intellipaat.com')
+@app.route("/view", methods=['GET'])
+def view():
+    return render_template('ViewEmp.html')
+
+
+@app.route("/add", methods=['GET'])
+def add():
+    return render_template('AddEmpForm.html')
+
+
+@app.route("/edit", methods=['GET'])
+def edit():
+    return render_template('EditEmpForm.html')
 
 
 @app.route("/getemp", methods=['POST'])
