@@ -177,9 +177,9 @@ def add():
     return render_template('AddEmpForm.html')
 
 
-@app.route("/edit", methods=['GET'])
-def edit():
-    return render_template('EditEmpForm.html')
+@app.route("/edit/<emp_id>", methods=['GET'])
+def edit(emp_id):
+    return render_template('EditEmpForm.html', emp_id=emp_id)
 
 
 if __name__ == '__main__':

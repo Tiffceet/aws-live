@@ -16,7 +16,7 @@ $(function () {
                                             <td>${data.location}</td>
                                             <td>
                                                 <button class="btn btn-primary"><i class="fa-solid fa-eye"></i>&nbsp;View</button>
-                                                <a href="/edit"><button class="btn btn-success"><i
+                                                <a href="/edit/${data.emp_id}"><button class="btn btn-success"><i
                                                             class="fa-solid fa-pencil"></i>&nbsp;Edit</button></a>
                                                 <button class="btn btn-danger"><i class="fa-solid fa-trash"></i>&nbsp;Delete</button>
                                             </td>

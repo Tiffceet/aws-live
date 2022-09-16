@@ -1,5 +1,5 @@
 // Shorthand for $( document ).ready()
-$(function() {
+$(function () {
     let pathname = window.location.pathname;
     switch (pathname) {
         case "/":
@@ -13,3 +13,13 @@ $(function() {
             break;
     }
 });
+
+function toggle_btn(element, state) {
+    if (!state) {
+        element.prop("disabled", true);
+        element.html(`<i class="fas fa-spinner fa-spin"></i>&nbsp;Adding...`);
+    } else {
+        element.prop("disabled", false);
+        element.html(`<i class="fa-solid fa-plus"></i>&nbsp;Add`);
+    }
+}
