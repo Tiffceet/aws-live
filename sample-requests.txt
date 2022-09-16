@@ -1,0 +1,7 @@
+curl -X POST -F emp_id=2 -F first_name=something -F last_name=something -F pri_skill=123 -F location=123 -F emp_image_file=@smile.png http://54.204.181.50/api/add
+
+curl -X PUT -F first_name=something -F last_name=Looz -F pri_skill=123 -F location=123 -F emp_image_file=@smile.png http://54.204.181.50/api/edit/2
+
+curl -X DELETE http://54.204.181.50/api/delete/2
+
+http://54.204.181.50/api/gets3obj/emp-id-2_image_file

@@ -1,3 +1,4 @@
+from stat import UF_APPEND
 from flask import Flask, render_template, request, make_response
 from pymysql import connections
 import pymysql
@@ -67,7 +68,7 @@ def apiadd():
     last_name = request.form.get('last_name')
     pri_skill = request.form.get('pri_skill')
     location = request.form.get('location')
-    emp_image_file = request.files['emp_image_file']
+    emp_image_file = request.files.get('emp_image_file')
 
     insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s, null)"
     try:
@@ -78,36 +79,37 @@ def apiadd():
     except Exception as e:
         return {"status": -1, "error": str(e)}
 
-    object_url = ""
-    emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
-    s3 = session.resource('s3')
-    try:
-        s3.Bucket(custombucket).put_object(
-            Key=emp_image_file_name_in_s3, Body=emp_image_file)
-        bucket_location = session.client(
-            's3').get_bucket_location(Bucket=custombucket)
-        s3_location = (bucket_location['LocationConstraint'])
+    if emp_image_file is not None:
+        object_url = ""
+        emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
+        s3 = session.resource('s3')
+        try:
+            s3.Bucket(custombucket).put_object(
+                Key=emp_image_file_name_in_s3, Body=emp_image_file)
+            bucket_location = session.client(
+                's3').get_bucket_location(Bucket=custombucket)
+            s3_location = (bucket_location['LocationConstraint'])
 
-        if s3_location is None:
-            s3_location = ''
-        else:
-            s3_location = '-' + s3_location
+            if s3_location is None:
+                s3_location = ''
+            else:
+                s3_location = '-' + s3_location
 
-        object_url = "https://s3{0}.amazonaws.com/{1}/{2}".format(
-            s3_location,
-            custombucket,
-            emp_image_file_name_in_s3)
+            object_url = "https://s3{0}.amazonaws.com/{1}/{2}".format(
+                s3_location,
+                custombucket,
+                emp_image_file_name_in_s3)
 
-    except Exception as e:
-        return {"status": -1, "error": str(e)}
+        except Exception as e:
+            return {"status": -1, "error": str(e)}
 
-    try:
-        with db_conn.cursor() as cursor:
-            cursor.execute(
-                "UPDATE employee SET image_url = %s WHERE emp_id = %s", (emp_image_file_name_in_s3, emp_id))
-            db_conn.commit()
-    except Exception as e:
-        return {"status": -1, "error": str(e)}
+        try:
+            with db_conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE employee SET image_url = %s WHERE emp_id = %s", (emp_image_file_name_in_s3, emp_id))
+                db_conn.commit()
+        except Exception as e:
+            return {"status": -1, "error": str(e)}
 
     return {"status": 0}
 
