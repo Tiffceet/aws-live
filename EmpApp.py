@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 from pymysql import connections
+import pymysql
 import os
 import boto3
 from config import customhost, customuser, custompass, customdb, custombucket, customregion, aws_access_key_id, aws_secret_access_key, aws_session_token
@@ -22,10 +23,141 @@ db_conn = connections.Connection(
     user=customuser,
     password=custompass,
     db=customdb
-
 )
-output = {}
-table = 'employee'
+
+
+@app.route("/api/gets3obj/<key>", methods=["GET"])
+def apigets3obj(key):
+    s3 = session.resource('s3')
+    try:
+        image = s3.Object(custombucket, key).get()["Body"].read()
+    except Exception as e:
+        return {"status": -1, "msg": str(e)}
+    response = make_response(image)
+    response.headers.set('Content-Type', 'image/png')
+    response.headers.set(
+        'Content-Disposition', 'attachment', filename='%s.jpg' % key)
+    return response
+
+
+@app.route("/api/get", methods=['GET'])
+def apiget():
+    emp_id = request.args.get('empid')
+    if emp_id is None:
+        with db_conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            sql = "SELECT * FROM employee"
+            cursor.execute(sql, (emp_id))
+            result = cursor.fetchall()
+            return {"data": result}
+    else:
+        with db_conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            sql = "SELECT * FROM employee WHERE `emp_id`=%s"
+            cursor.execute(sql, (emp_id))
+            result = cursor.fetchone()
+            if result is None:
+                return {"data": []}
+            else:
+                return {"data": result}
+
+
+@app.route("/api/add", methods=["POST"])
+def apiadd():
+    emp_id = request.form.get('emp_id')
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    pri_skill = request.form.get('pri_skill')
+    location = request.form.get('location')
+    emp_image_file = request.files['emp_image_file']
+
+    insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s, null)"
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute(insert_sql, (emp_id, first_name,
+                                        last_name, pri_skill, location))
+            db_conn.commit()
+    except Exception as e:
+        return {"status": -1, "error": str(e)}
+
+    object_url = ""
+    emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
+    s3 = session.resource('s3')
+    try:
+        s3.Bucket(custombucket).put_object(
+            Key=emp_image_file_name_in_s3, Body=emp_image_file)
+        bucket_location = session.client(
+            's3').get_bucket_location(Bucket=custombucket)
+        s3_location = (bucket_location['LocationConstraint'])
+
+        if s3_location is None:
+            s3_location = ''
+        else:
+            s3_location = '-' + s3_location
+
+        object_url = "https://s3{0}.amazonaws.com/{1}/{2}".format(
+            s3_location,
+            custombucket,
+            emp_image_file_name_in_s3)
+
+    except Exception as e:
+        return {"status": -1, "error": str(e)}
+
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE employee SET image_url = %s WHERE emp_id = %s", (emp_image_file_name_in_s3, emp_id))
+            db_conn.commit()
+    except Exception as e:
+        return {"status": -1, "error": str(e)}
+
+    return {"status": 0}
+
+
+@app.route("/api/edit/<emp_id>", methods=["PUT"])
+def apiedit(emp_id):
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    pri_skill = request.form.get('pri_skill')
+    location = request.form.get('location')
+    emp_image_file = request.files['emp_image_file']
+
+    update_sql = "UPDATE employee SET first_name=%s, last_name=%s, pri_skill=%s, location=%s WHERE emp_id = %s"
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute(update_sql, (first_name,
+                                        last_name, pri_skill, location, emp_id))
+            db_conn.commit()
+    except Exception as e:
+        return {"status": -1, "error": str(e)}
+
+    if emp_image_file is not None:
+        emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
+        s3 = session.resource('s3')
+        try:
+            s3.Object(custombucket, emp_image_file_name_in_s3).delete()
+            s3.Bucket(custombucket).put_object(
+                Key=emp_image_file_name_in_s3, Body=emp_image_file)
+
+        except Exception as e:
+            return {"status": -1, "error": str(e)}
+
+    return {"status": 0}
+
+
+@app.route("/api/delete/<empid>", methods=["DELETE"])
+def apidelete(empid):
+    delete_sql = "DELETE FROM employee WHERE emp_id = %s"
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute(delete_sql, (empid))
+            db_conn.commit()
+
+            # Delete image from S3
+            emp_image_file_name_in_s3 = "emp-id-" + str(empid) + "_image_file"
+            s3 = session.resource('s3')
+            s3.Object(custombucket, emp_image_file_name_in_s3).delete()
+    except Exception as e:
+        return {"status": -1, "error": str(e)}
+    return {"status": 0}
 
 
 @app.route("/", methods=['GET'])
@@ -46,84 +178,6 @@ def add():
 @app.route("/edit", methods=['GET'])
 def edit():
     return render_template('EditEmpForm.html')
-
-
-@app.route("/getemp", methods=['POST'])
-def GetEmp():
-    emp_id = request.form["emp_id"]
-    with db_conn.cursor() as cursor:
-        sql = "SELECT * FROM employee WHERE `emp_id`=%s"
-        cursor.execute(sql, (emp_id))
-        result = cursor.fetchone()
-        if result is None:
-            return render_template("GetEmp.html", output=f"Employee ID {emp_id} not found.<br>")
-        else:
-            return render_template("GetEmp.html", output=f"""
-            Employee ID:<br> { result[0] } <br><br>
-
-			  		First Name:<br> { result[1] } <br><br>
-
-			  		Last Name:<br> { result[2] } <br><br>
-
-			  		Primary Interest:<br> { result[3] } <br><br>
-
-			  		Location:<br> { result[4] } <br><br>
-
-			  		Image URL: <br> http://www.google.com <br><br>
-            """)
-
-
-@app.route("/addemp", methods=['POST'])
-def AddEmp():
-    emp_id = request.form['emp_id']
-    first_name = request.form['first_name']
-    last_name = request.form['last_name']
-    pri_skill = request.form['pri_skill']
-    location = request.form['location']
-    emp_image_file = request.files['emp_image_file']
-
-    insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s)"
-    cursor = db_conn.cursor()
-
-    if emp_image_file.filename == "":
-        return "Please select a file"
-
-    try:
-
-        cursor.execute(insert_sql, (emp_id, first_name,
-                       last_name, pri_skill, location))
-        db_conn.commit()
-        emp_name = "" + first_name + " " + last_name
-        # Uplaod image file in S3 #
-        emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
-        s3 = session.resource('s3')
-
-        try:
-            print("Data inserted in MySQL RDS... uploading image to S3...")
-            s3.Bucket(custombucket).put_object(
-                Key=emp_image_file_name_in_s3, Body=emp_image_file)
-            bucket_location = session.client(
-                's3').get_bucket_location(Bucket=custombucket)
-            s3_location = (bucket_location['LocationConstraint'])
-
-            if s3_location is None:
-                s3_location = ''
-            else:
-                s3_location = '-' + s3_location
-
-            object_url = "https://s3{0}.amazonaws.com/{1}/{2}".format(
-                s3_location,
-                custombucket,
-                emp_image_file_name_in_s3)
-
-        except Exception as e:
-            return str(e)
-
-    finally:
-        cursor.close()
-
-    print("all modification done...")
-    return render_template('AddEmpOutput.html', name=emp_name)
 
 
 if __name__ == '__main__':
