@@ -18,7 +18,7 @@ $(function () {
                                                 <button class="btn btn-primary"><i class="fa-solid fa-eye"></i>&nbsp;View</button>
                                                 <a href="/edit/${data.emp_id}"><button class="btn btn-success"><i
                                                             class="fa-solid fa-pencil"></i>&nbsp;Edit</button></a>
-                                                <button class="btn btn-danger"><i class="fa-solid fa-trash"></i>&nbsp;Delete</button>
+                                                <button onclick="deleteOnClick(event)" class="btn btn-danger"><i class="fa-solid fa-trash"></i>&nbsp;Delete</button>
                                             </td>
                                         </tr>`);
             });
@@ -28,3 +28,15 @@ $(function () {
         },
     });
 });
+
+function deleteOnClick(evt) {
+    let emp_id = $(evt.target).parent().parent().children()[1].innerHTML
+    $("#deleteMsg").html(`Delete employee with ID "${emp_id}" ?`)
+    $("#deleteModal").modal("show")
+}
+
+function deleteOperation() {
+    // 1. Show loading on delete button
+    // 2. Delete
+    // 3. Close modal and refresh page
+}
