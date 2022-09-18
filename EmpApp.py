@@ -169,7 +169,18 @@ def home():
 
 @app.route("/view", methods=['GET'])
 def view():
-    return render_template('ViewEmp.html')
+    msg_html = ""
+
+    lastaction = request.args.get("lastaction")
+    empid = request.args.get("empid")
+    if lastaction is not None and empid is not None:
+        if lastaction == "delete":
+            msg_html = f"""`<div class="alert alert-danger" role="alert">Successfully deleted employee ID {empid}</div>`"""
+        elif lastaction == "edit":
+            msg_html = f"""`<div class="alert alert-success" role="alert">Successfully edited employee ID {empid}</div>`"""
+        elif lastaction == "add":
+            msg_html = f"""`<div class="alert alert-success" role="alert">Successfully added employee ID {empid}</div>`"""
+    return render_template('ViewEmp.html', msg_prompt=msg_html)
 
 
 @app.route("/add", methods=['GET'])

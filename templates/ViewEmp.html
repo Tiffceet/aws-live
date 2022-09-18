@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
+    {{ msg_prompt|safe }}
     <div style="float:right;" class="p-3">
         <a href="/add">
             <button class="btn btn-success"><i class="fa-solid fa-plus"></i>&nbsp;Add
