@@ -50,7 +50,7 @@ mysql -u admin -P 3306 --host hrmsdb.ccdclt0oc5rh.us-east-1.rds.amazonaws.com -p
 sudo yum update -y
 sudo yum install git -y
 sudo yum install mariadb -y
-sudo git clone https://github.com/Tiffceet/aws-live
+git clone https://github.com/Tiffceet/aws-live
 cd aws-live
 sudo python3 -m pip install flask boto3 pymysql
 sudo touch config.py
@@ -60,8 +60,8 @@ echo custompass = \"admin123\" | sudo tee -a config.py
 echo customdb = \"employee\" | sudo tee -a config.py
 echo custombucket = \"loozikang-employee\" | sudo tee -a config.py
 echo customregion = \"us-east-1\" | sudo tee -a config.py
-echo aws_access_key_id=\"ASIA2JLL2O2P4PCKQ256\" | sudo tee -a config.py
-echo aws_secret_access_key=\"Yft3RizQGrvSZBPce6L2EVF2h/obPZ6rjLnVQ5uq\" | sudo tee -a config.py
-echo aws_session_token=\"FwoGZXIvYXdzEI3//////////wEaDAMoeelwglVPFamWxiLPARoAdPiyb+6fXM0UI4qqnlAsuuY+PuWYBInBKbssQUgXtCbaG1eHG1GvxVci4Zuaj7cxF1cVv73QKza99drn1J8VrpXeebDxDIWowWkL0rGvBi8Zx/IBM1dxn2YDR7YcqOnayzqh62OB5tffAmi3Xm2UeQagyIftIL6OP8s4XSBx8UX0ePzUnV2WHabYYkwdEo9n23RM6Ly2Jd4WNPxNbD2c+V5DL8hwWrq8oOyJHdGN8P4xAgzxT64b+DXymz4EbLLjaWeja8B7oye5yfzkIijjlpqZBjItU/avUP269yUfSWuEEzBj9VuvXR/gPwGhzHjaZnOgEfrXFyQ8mDlVPPpmsFPo\" | sudo tee -a config.py
+echo aws_access_key_id=\"\" | sudo tee -a config.py
+echo aws_secret_access_key=\"\" | sudo tee -a config.py
+echo aws_session_token=\"\" | sudo tee -a config.py
 sudo python3 EmpApp.py
 ```
