@@ -10,24 +10,25 @@ $(function () {
                 );
             }
 
-            const validateStr = (str) => {
-                if (typeof str === "string" && str.length > 30) {
-                    str = str.slice(0, 30) + "...";
-                }
-                return str;
-            };
-
             data.data.forEach((data, idx) => {
                 $("#emptable tbody").append(`<tr>
-                                            <td>${idx + 1}</td>
-                                            <td>${validateStr(data.emp_id)}</td>
-                                            <td>${validateStr(
+                                            <td class="custom-text-wrap">${
+                                                idx + 1
+                                            }</td>
+                                            <td class="custom-text-wrap">${
+                                                data.emp_id
+                                            }</td>
+                                            <td class="custom-text-wrap">${
                                                 data.first_name +
-                                                    " " +
-                                                    data.last_name
-                                            )}</td>
-                                            <td>${validateStr(data.pri_skill)}</td>
-                                            <td>${validateStr(data.location)}</td>
+                                                " " +
+                                                data.last_name
+                                            }</td>
+                                            <td class="custom-text-wrap">${
+                                                data.pri_skill
+                                            }</td>
+                                            <td class="custom-text-wrap">${
+                                                data.location
+                                            }</td>
                                             <td>
                                                 <button class="btn btn-primary" onclick="viewEmpDetails(event)"><i class="fa-solid fa-eye"></i>&nbsp;View</button>
                                                 <a href="/edit/${
