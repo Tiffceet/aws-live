@@ -9,17 +9,27 @@ $(function () {
                     `<tr><td colspan="6"><div style="text-align: center">No data</div></td></tr>`
                 );
             }
+
+            const validateStr = (str) => {
+                if (typeof str === "string" && str.length > 30) {
+                    str = str.slice(0, 30) + "...";
+                }
+                return str;
+            };
+
             data.data.forEach((data, idx) => {
                 $("#emptable tbody").append(`<tr>
                                             <td>${idx + 1}</td>
-                                            <td>${data.emp_id}</td>
-                                            <td>${data.first_name} ${
-                    data.last_name
-                }</td>
-                                            <td>${data.pri_skill}</td>
-                                            <td>${data.location}</td>
+                                            <td>${validateStr(data.emp_id)}</td>
+                                            <td>${validateStr(
+                                                data.first_name +
+                                                    " " +
+                                                    data.last_name
+                                            )}</td>
+                                            <td>${validateStr(data.pri_skill)}</td>
+                                            <td>${validateStr(data.location)}</td>
                                             <td>
-                                                <button class="btn btn-primary"><i class="fa-solid fa-eye"></i>&nbsp;View</button>
+                                                <button class="btn btn-primary" onclick="viewEmpDetails(event)"><i class="fa-solid fa-eye"></i>&nbsp;View</button>
                                                 <a href="/edit/${
                                                     data.emp_id
                                                 }"><button class="btn btn-success"><i
@@ -73,6 +83,50 @@ function deleteOperation() {
             );
             $("#deleteOptBtn").html("Delete");
             $("#deleteOptBtn").prop("disabled", false);
+        },
+    });
+}
+
+function viewEmpDetails(evt) {
+    let emp_id = $(evt.target).parent().parent().children()[1].innerHTML;
+    $("#detailsModal").modal("show");
+
+    $("#detailsModalLoading").show();
+    $("#detailsModalContent").hide();
+
+    $.ajax({
+        url: `/api/get?empid=${emp_id}`,
+        method: "GET",
+        success: (data, textStatus, jqXHR) => {
+            console.log(data);
+
+            const dashIfEmpty = (str) =>
+                typeof str === "string" && str.trim() !== "" ? str : "-";
+
+            let { first_name, image_url, last_name, location, pri_skill } =
+                data.data;
+            if (image_url) {
+                $("#detailsEmpImg").prop("src", `/api/gets3obj/${image_url}`);
+            } else {
+                $("#detailsEmpImg").prop("src", `/static/profile.png`);
+            }
+            $("#detailsEmpID").html(emp_id);
+            $("#detailsEmpName").html(
+                dashIfEmpty(`${first_name} ${last_name}`)
+            );
+            $("#detailsEmpPriSkill").html(dashIfEmpty(`${pri_skill}`));
+            $("#detailsEmpLocation").html(dashIfEmpty(`${location}`));
+
+            $("#detailsModalLoading").hide();
+            $("#detailsModalContent").show();
+        },
+        error: (jqXHR, textStatus, errorThrown) => {
+            $("#detailsModalLoading").hide();
+            $("#detailsModalContent").html(
+                "Something went wrong. Please try again later"
+            );
+            $("#detailsModalContent").show();
+            console.error(errorThrown);
         },
     });
 }
