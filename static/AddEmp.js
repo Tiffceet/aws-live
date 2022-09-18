@@ -50,8 +50,8 @@ function addEmp() {
                 error_prompt("Duplicated Employee ID");
                 return;
             }
-            success_prompt("Successfully added employee !");
-            window.location.href = "/view";
+            // success_prompt("Successfully added employee !");
+            window.location.href = `/view?lastaction=add&empid=${emp_id}`;
         },
         error: (jqXHR, textStatus, errorThrown) => {
             console.error(errorThrown);

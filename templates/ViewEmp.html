@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
-    {{ msg_prompt|safe }}
+    <div class="pt-3 px-3">
+        {{ msg_prompt|safe }}
+    </div>
     <div style="float:right;" class="p-3">
         <a href="/add">
             <button class="btn btn-success"><i class="fa-solid fa-plus"></i>&nbsp;Add
@@ -36,7 +38,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Delete Employee</h5>
-                    <button onclick='$("#deleteModal").modal("hide")' type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button onclick='$("#deleteModal").modal("hide")' type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -44,7 +47,8 @@
                     Delete employee with ID "EMP001" ?
                 </div>
                 <div class="modal-footer">
-                    <button onclick='$("#deleteModal").modal("hide")' type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button onclick='$("#deleteModal").modal("hide")' type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-danger">Delete</button>
                 </div>
             </div>

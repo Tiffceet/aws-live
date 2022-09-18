@@ -68,8 +68,8 @@ function editEmp() {
                 console.log(data);
                 return;
             }
-            success_prompt("Successfully edited employee !");
-            window.location.href = "/view";
+            // success_prompt("Successfully edited employee !");
+            window.location.href = `/view?lastaction=edit&empid=${emp_id}`;
         },
         error: (jqXHR, textStatus, errorThrown) => {
             console.error(errorThrown);
