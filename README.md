@@ -16,11 +16,10 @@
 
 2. Run the following bash script
 ```bash
-#!/bin/bash
 sudo yum update -y
 sudo yum install git -y
 sudo yum install mariadb -y
-# git clone https://github.com/lowchoonkeat/aws-live.git
+# git clone https://github.com/Tiffceet/aws-live
 # cd aws-live
 sudo python3 -m pip install flask boto3 pymysql
 ```
@@ -44,3 +43,15 @@ mysql -u admin -P 3306 --host hrmsdb.ccdclt0oc5rh.us-east-1.rds.amazonaws.com -p
 
 ## Notes
 1. When creating security group, create it from the VPC page and link it to the correct VPC
+
+2. EC2 User data
+```bash
+#!/bin/bash
+sudo yum update -y
+sudo yum install git -y
+sudo yum install mariadb -y
+git clone https://github.com/Tiffceet/aws-live
+cd aws-live
+sudo python3 -m pip install flask boto3 pymysql
+sudo python3 EmpApp.py
+```
