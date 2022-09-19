@@ -4,14 +4,7 @@ from pymysql import connections
 import pymysql
 import os
 import boto3
-from config import customhost, customuser, custompass, customdb, custombucket, customregion, aws_access_key_id, aws_secret_access_key, aws_session_token
-
-session = boto3.Session(
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    aws_session_token=aws_session_token
-)
-
+from config import customhost, customuser, custompass, customdb, custombucket, customregion
 
 app = Flask(__name__)
 
@@ -26,10 +19,9 @@ db_conn = connections.Connection(
     db=customdb
 )
 
-
 @app.route("/api/gets3obj/<key>", methods=["GET"])
 def apigets3obj(key):
-    s3 = session.resource('s3')
+    s3 = boto3.resource('s3')
     try:
         image = s3.Object(custombucket, key).get()["Body"].read()
     except Exception as e:
@@ -82,11 +74,11 @@ def apiadd():
     if emp_image_file is not None:
         object_url = ""
         emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
-        s3 = session.resource('s3')
+        s3 = boto3.resource('s3')
         try:
             s3.Bucket(custombucket).put_object(
                 Key=emp_image_file_name_in_s3, Body=emp_image_file)
-            bucket_location = session.client(
+            bucket_location = boto3.client(
                 's3').get_bucket_location(Bucket=custombucket)
             s3_location = (bucket_location['LocationConstraint'])
 
@@ -133,7 +125,7 @@ def apiedit(emp_id):
 
     if emp_image_file is not None:
         emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
-        s3 = session.resource('s3')
+        s3 = boto3.resource('s3')
         try:
             s3.Object(custombucket, emp_image_file_name_in_s3).delete()
             s3.Bucket(custombucket).put_object(
@@ -155,7 +147,7 @@ def apidelete(empid):
 
             # Delete image from S3
             emp_image_file_name_in_s3 = "emp-id-" + str(empid) + "_image_file"
-            s3 = session.resource('s3')
+            s3 = boto3.resource('s3')
             s3.Object(custombucket, emp_image_file_name_in_s3).delete()
     except Exception as e:
         return {"status": -1, "error": str(e)}

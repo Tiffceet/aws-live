@@ -9,10 +9,7 @@
 | custompass            | RDS password          |
 | customdb              | RDS database name     |        
 | custombucket          | S3 bucket name        |       
-| customregion          | AWS account region    |                
-| aws_access_key_id     | AWS access key id     |                
-| aws_secret_access_key | AWS access secret access key id |                
-| aws_session_token     | AWS session token     |                
+| customregion          | AWS account region    |          
 
 2. Run the following bash script
 ```bash
@@ -51,17 +48,10 @@ sudo yum update -y
 sudo yum install git -y
 sudo yum install mariadb -y
 git clone https://github.com/Tiffceet/aws-live
-cd aws-live
 sudo python3 -m pip install flask boto3 pymysql
-sudo touch config.py
-echo customhost = \"hrmsdb.ccdclt0oc5rh.us-east-1.rds.amazonaws.com\" | sudo tee -a config.py
-echo customuser = \"admin\" | sudo tee -a config.py
-echo custompass = \"admin123\" | sudo tee -a config.py
-echo customdb = \"employee\" | sudo tee -a config.py
-echo custombucket = \"loozikang-employee\" | sudo tee -a config.py
-echo customregion = \"us-east-1\" | sudo tee -a config.py
-echo aws_access_key_id=\"\" | sudo tee -a config.py
-echo aws_secret_access_key=\"\" | sudo tee -a config.py
-echo aws_session_token=\"\" | sudo tee -a config.py
+cd aws-live
 sudo python3 EmpApp.py
 ```
+
+3. When createing EC2, MUST attach LabRole as Instance profile; boto3 will do its job by using the given temporary access key inside EC2
+Read https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html for more info

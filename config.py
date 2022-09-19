@@ -1,0 +1,6 @@
+customhost = "hrmsdb.ccdclt0oc5rh.us-east-1.rds.amazonaws.com"
+customuser = "admin"
+custompass = "admin123"
+customdb = "employee"
+custombucket = "loozikang-employee"
+customregion = "us-east-1"
