@@ -29,7 +29,7 @@ def apigets3obj(key):
     response = make_response(image)
     response.headers.set('Content-Type', 'image/png')
     response.headers.set(
-        'Content-Disposition', 'attachment', filename='%s.jpg' % key)
+        'Content-Disposition', 'attachment', filename='%s.png' % key)
     return response
 
 
