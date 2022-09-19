@@ -108,7 +108,7 @@ function viewEmpDetails(evt) {
             let { first_name, image_url, last_name, location, pri_skill } =
                 data.data;
             if (image_url) {
-                $("#detailsEmpImg").prop("src", `/api/gets3obj/${image_url}`);
+                $("#detailsEmpImg").prop("src", `https://loozikang-employee.s3.amazonaws.com/${image_url}`);
             } else {
                 $("#detailsEmpImg").prop("src", `/static/profile.png`);
             }
