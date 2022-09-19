@@ -89,7 +89,8 @@ function deleteOperation() {
 }
 
 function viewEmpDetails(evt) {
-    let emp_id = $(evt.target).parent().parent().children()[1].innerHTML;
+    let emp_id = $(evt.target).closest("tr").children()[1].innerHTML;
+    
     $("#detailsModal").modal("show");
 
     $("#detailsModalLoading").show();
