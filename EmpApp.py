@@ -11,13 +11,6 @@ app = Flask(__name__)
 bucket = custombucket
 region = customregion
 
-db_conn = connections.Connection(
-    host=customhost,
-    port=3306,
-    user=customuser,
-    password=custompass,
-    db=customdb
-)
 
 @app.route("/api/gets3obj/<key>", methods=["GET"])
 def apigets3obj(key):
@@ -35,123 +28,151 @@ def apigets3obj(key):
 
 @app.route("/api/get", methods=['GET'])
 def apiget():
-    emp_id = request.args.get('empid')
-    if emp_id is None:
-        with db_conn.cursor(pymysql.cursors.DictCursor) as cursor:
-            sql = "SELECT * FROM employee"
-            cursor.execute(sql, (emp_id))
-            result = cursor.fetchall()
-            return {"data": result}
-    else:
-        with db_conn.cursor(pymysql.cursors.DictCursor) as cursor:
-            sql = "SELECT * FROM employee WHERE `emp_id`=%s"
-            cursor.execute(sql, (emp_id))
-            result = cursor.fetchone()
-            if result is None:
-                return {"data": []}
-            else:
+    with connections.Connection(
+        host=customhost,
+        port=3306,
+        user=customuser,
+        password=custompass,
+        db=customdb
+    ) as db_conn:
+        emp_id = request.args.get('empid')
+        if emp_id is None:
+            with db_conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql = "SELECT * FROM employee"
+                cursor.execute(sql, (emp_id))
+                result = cursor.fetchall()
                 return {"data": result}
+        else:
+            with db_conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql = "SELECT * FROM employee WHERE `emp_id`=%s"
+                cursor.execute(sql, (emp_id))
+                result = cursor.fetchone()
+                if result is None:
+                    return {"data": []}
+                else:
+                    return {"data": result}
 
 
 @app.route("/api/add", methods=["POST"])
 def apiadd():
-    emp_id = request.form.get('emp_id')
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    pri_skill = request.form.get('pri_skill')
-    location = request.form.get('location')
-    emp_image_file = request.files.get('emp_image_file')
+    with connections.Connection(
+        host=customhost,
+        port=3306,
+        user=customuser,
+        password=custompass,
+        db=customdb
+    ) as db_conn:
+        emp_id = request.form.get('emp_id')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        pri_skill = request.form.get('pri_skill')
+        location = request.form.get('location')
+        emp_image_file = request.files.get('emp_image_file')
 
-    insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s, null)"
-    try:
-        with db_conn.cursor() as cursor:
-            cursor.execute(insert_sql, (emp_id, first_name,
-                                        last_name, pri_skill, location))
-            db_conn.commit()
-    except Exception as e:
-        return {"status": -1, "error": str(e)}
-
-    if emp_image_file is not None:
-        object_url = ""
-        emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
-        s3 = boto3.resource('s3')
-        try:
-            s3.Bucket(custombucket).put_object(
-                Key=emp_image_file_name_in_s3, Body=emp_image_file)
-            bucket_location = boto3.client(
-                's3').get_bucket_location(Bucket=custombucket)
-            s3_location = (bucket_location['LocationConstraint'])
-
-            if s3_location is None:
-                s3_location = ''
-            else:
-                s3_location = '-' + s3_location
-
-            object_url = "https://s3{0}.amazonaws.com/{1}/{2}".format(
-                s3_location,
-                custombucket,
-                emp_image_file_name_in_s3)
-
-        except Exception as e:
-            return {"status": -1, "error": str(e)}
-
+        insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s, null)"
         try:
             with db_conn.cursor() as cursor:
-                cursor.execute(
-                    "UPDATE employee SET image_url = %s WHERE emp_id = %s", (emp_image_file_name_in_s3, emp_id))
+                cursor.execute(insert_sql, (emp_id, first_name,
+                                            last_name, pri_skill, location))
                 db_conn.commit()
         except Exception as e:
             return {"status": -1, "error": str(e)}
 
-    return {"status": 0}
+        if emp_image_file is not None:
+            object_url = ""
+            emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
+            s3 = boto3.resource('s3')
+            try:
+                s3.Bucket(custombucket).put_object(
+                    Key=emp_image_file_name_in_s3, Body=emp_image_file)
+                bucket_location = boto3.client(
+                    's3').get_bucket_location(Bucket=custombucket)
+                s3_location = (bucket_location['LocationConstraint'])
+
+                if s3_location is None:
+                    s3_location = ''
+                else:
+                    s3_location = '-' + s3_location
+
+                object_url = "https://s3{0}.amazonaws.com/{1}/{2}".format(
+                    s3_location,
+                    custombucket,
+                    emp_image_file_name_in_s3)
+
+            except Exception as e:
+                return {"status": -1, "error": str(e)}
+
+            try:
+                with db_conn.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE employee SET image_url = %s WHERE emp_id = %s", (emp_image_file_name_in_s3, emp_id))
+                    db_conn.commit()
+            except Exception as e:
+                return {"status": -1, "error": str(e)}
+
+        return {"status": 0}
 
 
 @app.route("/api/edit/<emp_id>", methods=["PUT"])
 def apiedit(emp_id):
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    pri_skill = request.form.get('pri_skill')
-    location = request.form.get('location')
-    emp_image_file = request.files.get('emp_image_file')
+    with connections.Connection(
+        host=customhost,
+        port=3306,
+        user=customuser,
+        password=custompass,
+        db=customdb
+    ) as db_conn:
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        pri_skill = request.form.get('pri_skill')
+        location = request.form.get('location')
+        emp_image_file = request.files.get('emp_image_file')
 
-    update_sql = "UPDATE employee SET first_name=%s, last_name=%s, pri_skill=%s, location=%s WHERE emp_id = %s"
-    try:
-        with db_conn.cursor() as cursor:
-            cursor.execute(update_sql, (first_name,
-                                        last_name, pri_skill, location, emp_id))
-            db_conn.commit()
-    except Exception as e:
-        return {"status": -1, "error": str(e)}
-
-    if emp_image_file is not None:
-        emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
-        s3 = boto3.resource('s3')
+        update_sql = "UPDATE employee SET first_name=%s, last_name=%s, pri_skill=%s, location=%s WHERE emp_id = %s"
         try:
-            s3.Object(custombucket, emp_image_file_name_in_s3).delete()
-            s3.Bucket(custombucket).put_object(
-                Key=emp_image_file_name_in_s3, Body=emp_image_file)
-
+            with db_conn.cursor() as cursor:
+                cursor.execute(update_sql, (first_name,
+                                            last_name, pri_skill, location, emp_id))
+                db_conn.commit()
         except Exception as e:
             return {"status": -1, "error": str(e)}
 
-    return {"status": 0}
+        if emp_image_file is not None:
+            emp_image_file_name_in_s3 = "emp-id-" + str(emp_id) + "_image_file"
+            s3 = boto3.resource('s3')
+            try:
+                s3.Object(custombucket, emp_image_file_name_in_s3).delete()
+                s3.Bucket(custombucket).put_object(
+                    Key=emp_image_file_name_in_s3, Body=emp_image_file)
+
+            except Exception as e:
+                return {"status": -1, "error": str(e)}
+
+        return {"status": 0}
 
 
 @app.route("/api/delete/<empid>", methods=["DELETE"])
 def apidelete(empid):
-    delete_sql = "DELETE FROM employee WHERE emp_id = %s"
-    try:
-        with db_conn.cursor() as cursor:
-            cursor.execute(delete_sql, (empid))
-            db_conn.commit()
+    with connections.Connection(
+        host=customhost,
+        port=3306,
+        user=customuser,
+        password=custompass,
+        db=customdb
+    ) as db_conn:
+        delete_sql = "DELETE FROM employee WHERE emp_id = %s"
+        try:
+            with db_conn.cursor() as cursor:
+                cursor.execute(delete_sql, (empid))
+                db_conn.commit()
 
-            # Delete image from S3
-            emp_image_file_name_in_s3 = "emp-id-" + str(empid) + "_image_file"
-            s3 = boto3.resource('s3')
-            s3.Object(custombucket, emp_image_file_name_in_s3).delete()
-    except Exception as e:
-        return {"status": -1, "error": str(e)}
-    return {"status": 0}
+                # Delete image from S3
+                emp_image_file_name_in_s3 = "emp-id-" + str(empid) + "_image_file"
+                s3 = boto3.resource('s3')
+                s3.Object(custombucket, emp_image_file_name_in_s3).delete()
+        except Exception as e:
+            return {"status": -1, "error": str(e)}
+        return {"status": 0}
 
 
 @app.route("/", methods=['GET'])
