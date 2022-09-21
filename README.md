@@ -13,14 +13,18 @@
 3. Set bucket policy to allow all bucket items to be read-only by anonymous user [Read More](https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies.html#example-bucket-policies-use-case-2)
 
 ## RDS Setup
-
-1. Connect to RDS
+1. Username: admin
+    Password: admin123
+2. Connect to an EC2 compute resource
+3. No public access
+4. Select security group
+5. Connect to RDS
 
 ```
 mysql -u admin -P 3306 --host hrmsdb.ccdclt0oc5rh.us-east-1.rds.amazonaws.com -p
 ```
 
-2. Run sql commands in `database.sql`
+6. Run sql commands in `database.sql`
 
 ## EC2 Setup
 
@@ -42,6 +46,10 @@ cd aws-live
 2. Test if the server works with `sudo python3 EmpApp.py`
 
 3. Create AMI with this EC2 instance
+
+4. Attach LabRole as Instance Profile (Ctrl + F : AMI)
+
+5. Launch template attach LabRole as Instance Profile (Ctrl + F : AMI)
 
 ## Load Balancer & Auto Scaling
 
